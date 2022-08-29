@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 // @ts-ignore
 import Client from "shopify-buy/index.es.js";
 export default class Shopify {
@@ -20,13 +21,13 @@ export default class Shopify {
         shopify.init();
     }
     init() {
-        const cart = this;
-        if (localStorage.getItem(cart.storageKey)) {
-            cart.client.checkout.fetch(localStorage.getItem(cart.storageKey))
-                .then(cart.updateCart);
+        const shopify = this;
+        if (localStorage.getItem(shopify.storageKey)) {
+            shopify.client.checkout.fetch(localStorage.getItem(shopify.storageKey))
+                .then((cart) => shopify.updateCart(cart));
         }
         else {
-            cart.updateCart();
+            shopify.updateCart();
         }
     }
     updateCart(cart) {
@@ -64,7 +65,7 @@ export default class Shopify {
                 variantId: btoa(`gid://shopify/ProductVariant/${variantId}`),
                 quantity: quantity
             }
-        ]).then(shopify.updateCart);
+        ]).then((cart) => shopify.updateCart(cart));
     }
     updateLineItem(lineItemId, quantity) {
         const shopify = this;
@@ -73,11 +74,11 @@ export default class Shopify {
                 id: lineItemId,
                 quantity: quantity
             }
-        ]).then(shopify.updateCart);
+        ]).then((cart) => shopify.updateCart(cart));
     }
     removeLineItem(lineItemId) {
         const shopify = this;
         return shopify.client.checkout.removeLineItems(shopify.cart.id, [lineItemId])
-            .then(shopify.updateCart);
+            .then((cart) => shopify.updateCart(cart));
     }
 }
