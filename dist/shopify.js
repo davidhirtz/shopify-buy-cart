@@ -4,10 +4,17 @@ import Client from "shopify-buy/index.es.js";
 export default class Shopify {
     constructor(config) {
         this.itemCount = 0;
-        this.storageKey = 'shopifyCheckout';
         this.afterCartUpdate = () => {
+            const shopify = this;
+            shopify.$subtotal.innerHTML = shopify.formatPrice(shopify.cart.subtotalPrice);
+            shopify.$cart.classList.remove(shopify.cartIsLoadingClass);
         };
         this.onItemCountChange = () => {
+            const shopify = this;
+            const count = shopify.itemCount;
+            shopify.$cart.classList[count > 0 ? 'remove' : 'add'](shopify.cartIsEmptyClass);
+            shopify.$cartCount.innerHTML = count.toString();
+            shopify.render();
         };
         this.formatPrice = (price) => {
             return parseFloat(price).toLocaleString(this.language || undefined, { minimumFractionDigits: 2 });
@@ -18,6 +25,13 @@ export default class Shopify {
         shopify.client = Client.buildClient(config);
         shopify.language = config.language || null;
         shopify.cart = null;
+        shopify.$cartCount = document.getElementById('cart-count');
+        shopify.$cart = document.getElementById('cart');
+        shopify.$items = document.getElementById('items');
+        shopify.$subtotal = document.getElementById('subtotal');
+        shopify.hasCartClass = 'has-cart';
+        shopify.cartIsLoadingClass = 'is-loading';
+        shopify.cartIsEmptyClass = 'is-empty';
         shopify.init();
     }
     init() {
@@ -60,12 +74,15 @@ export default class Shopify {
     }
     addLineItem(variantId, quantity = 1) {
         const shopify = this;
+        shopify.$cart.classList.add(shopify.cartIsLoadingClass);
         return shopify.client.checkout.addLineItems(shopify.cart.id, [
             {
                 variantId: btoa(`gid://shopify/ProductVariant/${variantId}`),
                 quantity: quantity
             }
-        ]).then((cart) => shopify.updateCart(cart));
+        ])
+            .then((cart) => shopify.updateCart(cart))
+            .then(() => shopify.render());
     }
     updateLineItem(lineItemId, quantity) {
         const shopify = this;
@@ -80,5 +97,16 @@ export default class Shopify {
         const shopify = this;
         return shopify.client.checkout.removeLineItems(shopify.cart.id, [lineItemId])
             .then((cart) => shopify.updateCart(cart));
+    }
+    render() {
+        const shopify = this;
+        shopify.$items.innerHTML = '';
+        for (let i = 0; i < shopify.cart.lineItems.length; i++) {
+            let item = shopify.cart.lineItems[i];
+            shopify.$items.innerHTML += shopify.renderItem(item);
+        }
+    }
+    renderItem(item) {
+        return '';
     }
 }
