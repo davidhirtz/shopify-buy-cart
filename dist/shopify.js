@@ -29,7 +29,6 @@ export default class Shopify {
         shopify.$cart = document.getElementById('cart');
         shopify.$items = document.getElementById('items');
         shopify.$subtotal = document.getElementById('subtotal');
-        shopify.hasCartClass = 'has-cart';
         shopify.cartIsLoadingClass = 'is-loading';
         shopify.cartIsEmptyClass = 'is-empty';
         shopify.init();

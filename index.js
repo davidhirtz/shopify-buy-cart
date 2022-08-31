@@ -1,1 +1,1 @@
-export Shopify from './dist/shopify.js';
+export {default as Shopify, default} from './dist/shopify.js';

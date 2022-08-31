@@ -8,7 +8,6 @@ export default class Shopify {
     $cartCount: HTMLElement;
     shopify: HTMLElement;
     $items: HTMLElement;
-    hasCartClass: string;
     cartIsLoadingClass: string;
     cartIsEmptyClass: string;
     $subtotal: HTMLElement;

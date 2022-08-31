@@ -1,6 +1,6 @@
 {
   "name": "shopify-buy-cart",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple ES6 shopping cart based on Shopify's Buy API",
   "type": "module",
   "main": "index.js",
@@ -18,10 +18,10 @@
   "devDependencies": {
     "@types/shopify-buy": "^2.10.10",
     "gulp-typescript": "^6.0.0-alpha.1",
+    "merge2": "^1.4.1",
     "typescript": "^4.8.2"
   },
   "dependencies": {
-    "merge2": "^1.4.1",
     "shopify-buy": "^2.16.1"
   }
 }
