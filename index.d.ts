@@ -1,1 +1,2 @@
-export * from './types/shopify';
+import Shopify from './types/shopify';
+export default Shopify;
