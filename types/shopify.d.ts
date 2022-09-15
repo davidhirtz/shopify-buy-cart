@@ -10,6 +10,7 @@ export default class Shopify {
     $items: HTMLElement;
     cartIsLoadingClass: string;
     cartIsEmptyClass: string;
+    errorClass: string;
     $subtotal: HTMLElement;
     $cart: HTMLElement;
     constructor(config: ShopifyBuy.Config);
@@ -24,5 +25,6 @@ export default class Shopify {
     removeLineItem(lineItemId: any): Promise<void>;
     render(): void;
     renderItem(item: any): string;
+    renderError(error: Error): void;
     formatPrice: (price: any) => string;
 }

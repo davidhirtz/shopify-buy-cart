@@ -1,6 +1,6 @@
 {
   "name": "shopify-buy-cart",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple ES6 shopping cart based on Shopify's Buy API",
   "type": "module",
   "main": "index.js",

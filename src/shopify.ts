@@ -13,6 +13,7 @@ export default class Shopify {
     $items: HTMLElement;
     cartIsLoadingClass: string;
     cartIsEmptyClass: string;
+    errorClass: string;
     $subtotal: HTMLElement;
     $cart: HTMLElement;
 
@@ -32,6 +33,7 @@ export default class Shopify {
         shopify.$subtotal = document.getElementById('subtotal');
         shopify.cartIsLoadingClass = 'is-loading';
         shopify.cartIsEmptyClass = 'is-empty';
+        shopify.errorClass = 'error';
 
         shopify.init();
     }
@@ -84,7 +86,7 @@ export default class Shopify {
 
     afterCartUpdate = () => {
         const shopify = this;
-        shopify.$subtotal.innerHTML = shopify.formatPrice(shopify.cart.subtotalPrice);
+        shopify.$subtotal.innerHTML = shopify.cart ? shopify.formatPrice(shopify.cart.subtotalPrice) : '';
         shopify.$cart.classList.remove(shopify.cartIsLoadingClass);
     }
 
@@ -109,6 +111,7 @@ export default class Shopify {
                 quantity: quantity
             }
         ])
+            .catch((error) => shopify.renderError(error))
             .then((cart) => shopify.updateCart(cart))
             .then(() => shopify.render());
     }
@@ -121,13 +124,16 @@ export default class Shopify {
                 id: lineItemId,
                 quantity: quantity
             }
-        ]).then((cart) => shopify.updateCart(cart));
+        ])
+            .catch((error) => shopify.renderError(error))
+            .then((cart) => shopify.updateCart(cart));
     }
 
     removeLineItem(lineItemId) {
         const shopify = this;
 
         return shopify.client.checkout.removeLineItems(shopify.cart.id, [lineItemId])
+            .catch((error) => shopify.renderError(error))
             .then((cart) => shopify.updateCart(cart));
     }
 
@@ -143,6 +149,12 @@ export default class Shopify {
 
     renderItem(item): string {
         return '';
+    }
+
+    renderError(error: Error) {
+        const shopify = this;
+        const message = JSON.parse(error.message)[0].message || 'An unknown error occurred';
+        shopify.$items.innerHTML = `<div class="${shopify.errorClass}">${message}</div>${shopify.$items.innerHTML}`;
     }
 
     formatPrice = (price) => {
