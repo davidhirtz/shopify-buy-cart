@@ -50,7 +50,7 @@ export default class Shopify {
     updateCart(cart?) {
         const shopify = this;
 
-        if (cart) {
+        if (cart && !cart.completedAt) {
             shopify.cart = cart;
         } else {
             shopify.createCheckout();
