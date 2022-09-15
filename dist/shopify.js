@@ -31,7 +31,7 @@ export default class Shopify {
         shopify.$subtotal = document.getElementById('subtotal');
         shopify.cartIsLoadingClass = 'is-loading';
         shopify.cartIsEmptyClass = 'is-empty';
-        shopify.errorClass = 'error';
+        shopify.errorClass = 'cart-error';
         shopify.init();
     }
     init() {
