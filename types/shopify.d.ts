@@ -1,7 +1,8 @@
 /// <reference types="shopify-buy" />
+import Client, { Cart } from "shopify-buy/index.es.js";
 export default class Shopify {
-    cart: ShopifyBuy.Cart;
-    client: ShopifyBuy.Client;
+    cart: Cart;
+    client: Client;
     itemCount: number;
     language: string;
     storageKey: string;
@@ -20,9 +21,9 @@ export default class Shopify {
     updateItemCount(): void;
     afterCartUpdate: () => void;
     onItemCountChange: () => void;
-    addLineItem(variantId: any, quantity?: number): Promise<void>;
-    updateLineItem(lineItemId: any, quantity: any): Promise<void>;
-    removeLineItem(lineItemId: any): Promise<void>;
+    addLineItem(variantId: any, quantity?: number): any;
+    updateLineItem(lineItemId: any, quantity: any): any;
+    removeLineItem(lineItemId: any): any;
     render(): void;
     renderItem(item: any): string;
     renderError(error: Error): void;

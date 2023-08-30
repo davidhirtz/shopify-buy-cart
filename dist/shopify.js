@@ -6,7 +6,7 @@ export default class Shopify {
         this.itemCount = 0;
         this.afterCartUpdate = () => {
             const shopify = this;
-            shopify.$subtotal.innerHTML = shopify.cart ? shopify.formatPrice(shopify.cart.subtotalPrice) : '';
+            shopify.$subtotal.innerHTML = shopify.cart ? shopify.formatPrice(shopify.cart.subtotalPrice.amount) : '';
             shopify.$cart.classList.remove(shopify.cartIsLoadingClass);
         };
         this.onItemCountChange = () => {

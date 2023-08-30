@@ -1,10 +1,10 @@
 // noinspection JSUnusedGlobalSymbols
 // @ts-ignore
-import Client from "shopify-buy/index.es.js";
+import Client, {Cart} from "shopify-buy/index.es.js";
 
 export default class Shopify {
-    cart: ShopifyBuy.Cart;
-    client: ShopifyBuy.Client;
+    cart: Cart;
+    client: Client;
     itemCount: number = 0;
     language: string;
     storageKey: string;
@@ -86,7 +86,7 @@ export default class Shopify {
 
     afterCartUpdate = () => {
         const shopify = this;
-        shopify.$subtotal.innerHTML = shopify.cart ? shopify.formatPrice(shopify.cart.subtotalPrice) : '';
+        shopify.$subtotal.innerHTML = shopify.cart ? shopify.formatPrice(shopify.cart.subtotalPrice.amount) : '';
         shopify.$cart.classList.remove(shopify.cartIsLoadingClass);
     }
 
