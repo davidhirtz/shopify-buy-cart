@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "declaration": true,
+    "declarationDir": "./types",
+    "declarationMap": true,
     "module": "ES6",
-    "declaration": true
+    "outDir": "dist",
+    "rootDir": "src",
+    "target": "ES6"
   },
   "include": [
     "src/**/*"

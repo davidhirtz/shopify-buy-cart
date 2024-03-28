@@ -1,21 +1,23 @@
 // noinspection JSUnusedGlobalSymbols
 // @ts-ignore
-import Client, {Cart} from "shopify-buy/index.es.js";
+import Client from "shopify-buy/index.es.js";
+import * as ShopifyBuy from "shopify-buy";
 
 export default class Shopify {
-    cart: Cart;
-    client: Client;
-    itemCount: number = 0;
-    language: string;
-    storageKey: string;
-    $cartCount: HTMLElement;
-    shopify: HTMLElement;
-    $items: HTMLElement;
-    cartIsLoadingClass: string;
-    cartIsEmptyClass: string;
-    errorClass: string;
-    $subtotal: HTMLElement;
     $cart: HTMLElement;
+    $cartCount: HTMLElement;
+    $items: HTMLElement;
+    $subtotal: HTMLElement;
+    checkout: ShopifyBuy.Checkout;
+    client: Client;
+    errorClass: string;
+    isEmptyClass: string;
+    isLoadingClass: string;
+    itemCount: number = 0;
+    itemTemplate: string;
+    language: string;
+    shopify: HTMLElement;
+    storageKey: string;
 
     constructor(config: ShopifyBuy.Config) {
         const shopify = this;
@@ -25,14 +27,14 @@ export default class Shopify {
 
         shopify.client = Client.buildClient(config);
         shopify.language = config.language || null;
-        shopify.cart = null;
+        shopify.checkout = null;
 
         shopify.$cartCount = document.getElementById('cart-count');
         shopify.$cart = document.getElementById('cart');
         shopify.$items = document.getElementById('items');
         shopify.$subtotal = document.getElementById('subtotal');
-        shopify.cartIsLoadingClass = 'is-loading';
-        shopify.cartIsEmptyClass = 'is-empty';
+        shopify.isLoadingClass = 'is-loading';
+        shopify.isEmptyClass = 'is-empty';
         shopify.errorClass = 'cart-error';
 
         shopify.init();
@@ -43,39 +45,43 @@ export default class Shopify {
 
         if (localStorage.getItem(shopify.storageKey)) {
             shopify.client.checkout.fetch(localStorage.getItem(shopify.storageKey))
-                .then((cart) => shopify.updateCart(cart));
+                .then((checkout: ShopifyBuy.Checkout) => shopify.initCheckout(checkout));
         } else {
-            shopify.updateCart();
+            shopify.initCheckout();
         }
     }
 
-    updateCart(cart?) {
+    initCheckout(checkout?: ShopifyBuy.Checkout) {
+        this.updateCheckout(checkout)
+    }
+
+    updateCheckout(checkout?: ShopifyBuy.Checkout) {
         const shopify = this;
 
-        if (cart && !cart.completedAt) {
-            shopify.cart = cart;
+        if (checkout && !checkout.completedAt) {
+            shopify.checkout = checkout;
         } else {
             shopify.createCheckout();
         }
 
         shopify.updateItemCount();
-        shopify.afterCartUpdate();
+        shopify.afterCheckoutUpdate();
     }
 
     createCheckout() {
         const shopify = this;
 
-        shopify.client.checkout.create().then(function (cart) {
-            localStorage.setItem(shopify.storageKey, cart.id as string);
-            shopify.cart = cart;
+        shopify.client.checkout.create().then((checkout: ShopifyBuy.Checkout) => {
+            localStorage.setItem(shopify.storageKey, checkout.id as string);
+            shopify.checkout = checkout;
         });
     }
 
     updateItemCount() {
         const shopify = this;
 
-        if (shopify.cart) {
-            const itemCount = shopify.cart.lineItems.length;
+        if (shopify.checkout) {
+            const itemCount = shopify.checkout.lineItems.length;
 
             if (shopify.itemCount !== itemCount) {
                 shopify.itemCount = itemCount;
@@ -84,71 +90,84 @@ export default class Shopify {
         }
     }
 
-    afterCartUpdate = () => {
+    afterCheckoutUpdate() {
         const shopify = this;
-        shopify.$subtotal.innerHTML = shopify.cart ? shopify.formatPrice(shopify.cart.subtotalPrice.amount) : '';
-        shopify.$cart.classList.remove(shopify.cartIsLoadingClass);
+
+        shopify.$subtotal.innerHTML = shopify.checkout
+            ? shopify.formatPrice(shopify.checkout.subtotalPrice.amount)
+            : '';
+
+        shopify.$cart.classList.remove(shopify.isLoadingClass);
     }
 
-    onItemCountChange = () => {
+    onItemCountChange() {
         const shopify = this;
         const count = shopify.itemCount;
 
-        shopify.$cart.classList[count > 0 ? 'remove' : 'add'](shopify.cartIsEmptyClass);
-        shopify.$cartCount.innerHTML = count.toString();
-
+        shopify.$cart.classList[count > 0 ? 'remove' : 'add'](shopify.isEmptyClass);
+        shopify.updateCartCount(count);
         shopify.render();
     }
 
-    addLineItem(variantId, quantity = 1) {
+    updateCartCount(count: number) {
+        this.$cartCount.innerHTML = count.toString();
+    }
+
+    addLineItem(variantId: ShopifyBuy.ID, quantity: number = 1) {
         const shopify = this;
 
-        shopify.$cart.classList.add(shopify.cartIsLoadingClass);
+        shopify.$cart.classList.add(shopify.isLoadingClass);
 
-        return shopify.client.checkout.addLineItems(shopify.cart.id, [
+        return shopify.client.checkout.addLineItems(shopify.checkout.id, [
             {
                 variantId: btoa(`gid://shopify/ProductVariant/${variantId}`),
                 quantity: quantity
             }
         ])
-            .catch((error) => shopify.renderError(error))
-            .then((cart) => shopify.updateCart(cart))
+            .catch((error: Error) => shopify.renderError(error))
+            .then((checkout: ShopifyBuy.Checkout) => shopify.updateCheckout(checkout))
             .then(() => shopify.render());
     }
 
-    updateLineItem(lineItemId, quantity) {
+    updateLineItem(lineItemId: ShopifyBuy.ID, quantity: number) {
         const shopify = this;
 
-        return shopify.client.checkout.updateLineItems(shopify.cart.id, [
+        return shopify.client.checkout.updateLineItems(shopify.checkout.id, [
             {
                 id: lineItemId,
                 quantity: quantity
             }
         ])
-            .catch((error) => shopify.renderError(error))
-            .then((cart) => shopify.updateCart(cart));
+            .catch((error: Error) => shopify.renderError(error))
+            .then((checkout: ShopifyBuy.Checkout) => shopify.updateCheckout(checkout));
     }
 
-    removeLineItem(lineItemId) {
+    removeLineItem(lineItemId: ShopifyBuy.ID) {
         const shopify = this;
 
-        return shopify.client.checkout.removeLineItems(shopify.cart.id, [lineItemId])
-            .catch((error) => shopify.renderError(error))
-            .then((cart) => shopify.updateCart(cart));
+        return shopify.client.checkout.removeLineItems(shopify.checkout.id, [lineItemId])
+            .catch((error: Error) => shopify.renderError(error))
+            .then((checkout: ShopifyBuy.Checkout) => shopify.updateCheckout(checkout));
     }
 
     render() {
         const shopify = this;
         shopify.$items.innerHTML = '';
 
-        for (let i = 0; i < shopify.cart.lineItems.length; i++) {
-            let item = shopify.cart.lineItems[i];
+        for (let i = 0; i < shopify.checkout.lineItems.length; i++) {
+            let item = shopify.checkout.lineItems[i];
             shopify.$items.innerHTML += shopify.renderItem(item);
         }
     }
 
-    renderItem(item): string {
-        return '';
+    renderItem(item: ShopifyBuy.CheckoutLineItem): string {
+        return this.renderItemTemplate({
+            item: item,
+        })
+    }
+
+    renderItemTemplate(params: object) {
+        return new Function("return `" + this.itemTemplate + "`;").call(params);
     }
 
     renderError(error: Error) {
@@ -157,7 +176,7 @@ export default class Shopify {
         shopify.$items.innerHTML = `<div class="${shopify.errorClass}">${message}</div>${shopify.$items.innerHTML}`;
     }
 
-    formatPrice = (price) => {
-        return parseFloat(price).toLocaleString(this.language || undefined, {minimumFractionDigits: 2})
+    formatPrice = (price: number) => {
+        return parseFloat(price.toString()).toLocaleString(this.language || undefined, {minimumFractionDigits: 2})
     }
 }

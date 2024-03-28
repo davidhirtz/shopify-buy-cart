@@ -1,31 +1,36 @@
-/// <reference types="shopify-buy" />
-import Client, { Cart } from "shopify-buy/index.es.js";
+import Client from "shopify-buy/index.es.js";
+import * as ShopifyBuy from "shopify-buy";
 export default class Shopify {
-    cart: Cart;
-    client: Client;
-    itemCount: number;
-    language: string;
-    storageKey: string;
-    $cartCount: HTMLElement;
-    shopify: HTMLElement;
-    $items: HTMLElement;
-    cartIsLoadingClass: string;
-    cartIsEmptyClass: string;
-    errorClass: string;
-    $subtotal: HTMLElement;
     $cart: HTMLElement;
+    $cartCount: HTMLElement;
+    $items: HTMLElement;
+    $subtotal: HTMLElement;
+    checkout: ShopifyBuy.Checkout;
+    client: Client;
+    errorClass: string;
+    isEmptyClass: string;
+    isLoadingClass: string;
+    itemCount: number;
+    itemTemplate: string;
+    language: string;
+    shopify: HTMLElement;
+    storageKey: string;
     constructor(config: ShopifyBuy.Config);
     init(): void;
-    updateCart(cart?: any): void;
+    initCheckout(checkout?: ShopifyBuy.Checkout): void;
+    updateCheckout(checkout?: ShopifyBuy.Checkout): void;
     createCheckout(): void;
     updateItemCount(): void;
-    afterCartUpdate: () => void;
-    onItemCountChange: () => void;
-    addLineItem(variantId: any, quantity?: number): any;
-    updateLineItem(lineItemId: any, quantity: any): any;
-    removeLineItem(lineItemId: any): any;
+    afterCheckoutUpdate(): void;
+    onItemCountChange(): void;
+    updateCartCount(count: number): void;
+    addLineItem(variantId: ShopifyBuy.ID, quantity?: number): any;
+    updateLineItem(lineItemId: ShopifyBuy.ID, quantity: number): any;
+    removeLineItem(lineItemId: ShopifyBuy.ID): any;
     render(): void;
-    renderItem(item: any): string;
+    renderItem(item: ShopifyBuy.CheckoutLineItem): string;
+    renderItemTemplate(params: object): any;
     renderError(error: Error): void;
-    formatPrice: (price: any) => string;
+    formatPrice: (price: number) => string;
 }
+//# sourceMappingURL=shopify.d.ts.map

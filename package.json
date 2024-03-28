@@ -1,10 +1,10 @@
 {
   "name": "shopify-buy-cart",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A simple ES6 shopping cart based on Shopify's Buy API",
   "type": "module",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/shopify.js",
+  "types": "types/shopify.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/davidhirtz/shopify-buy-cart.git"
@@ -15,13 +15,14 @@
     "url": "https://github.com/davidhirtz/shopify-buy-cart/issues"
   },
   "homepage": "https://github.com/davidhirtz/shopify-buy-cart#readme",
+  "scripts": {
+    "build": "tsc"
+  },
   "devDependencies": {
-    "@types/shopify-buy": "^2.17.1",
-    "gulp-typescript": "^6.0.0-alpha.1",
-    "merge2": "^1.4.1",
-    "typescript": "^4.8.2"
+    "@types/shopify-buy": "^2.17.4",
+    "typescript": "^5.0.3"
   },
   "dependencies": {
-    "shopify-buy": "^2.2"
+    "shopify-buy": "^2.21.1"
   }
 }
